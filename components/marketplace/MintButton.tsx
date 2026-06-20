@@ -2,11 +2,28 @@
 
 import { useState } from "react";
 import { useAccount } from "wagmi";
+import { ethers } from "ethers";
+import {
+  REVEN_CARD_ABI,
+  REVEN_CARD_ADDRESS,
+} from "@/lib/contract/revenCard";
 
 interface Props {
   cardType: string;
   cardName: string;
 }
+
+const cardTypeMap: Record<string, number> = {
+  virtual: 0,
+  physical: 1,
+  free: 2,
+};
+
+const priceMap: Record<string, string> = {
+  virtual: "0.0005",
+  physical: "0.001",
+  free: "0",
+};
 
 export default function MintButton({ cardType, cardName }: Props) {
   const [loading, setLoading] = useState(false);
@@ -25,32 +42,65 @@ export default function MintButton({ cardType, cardName }: Props) {
       return;
     }
 
-    const user = JSON.parse(stored);
+    try {
+      setLoading(true);
 
-    setLoading(true);
+      const user = JSON.parse(stored);
 
-    const res = await fetch("/api/cards/mint", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user.id,
-        cardType,
-        walletAddress: address,
-      }),
-    });
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
-    const data = await res.json();
-    setLoading(false);
+      const contract = new ethers.Contract(
+        REVEN_CARD_ADDRESS,
+        REVEN_CARD_ABI,
+        signer
+      );
 
-    if (!res.ok) {
-      alert(data.error || "Mint failed.");
-      return;
+      const tx = await contract.mint(cardTypeMap[cardType], {
+        value: ethers.parseEther(priceMap[cardType]),
+      });
+
+      const receipt = await tx.wait();
+
+      let tokenId = "";
+
+      for (const log of receipt.logs) {
+        try {
+          const parsed = contract.interface.parseLog(log);
+          if (parsed?.name === "CardMinted") {
+            tokenId = parsed.args.tokenId.toString();
+          }
+        } catch {}
+      }
+
+      const res = await fetch("/api/cards/mint", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          cardType,
+          walletAddress: address,
+          tokenId,
+          txHash: tx.hash,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Database save failed.");
+        return;
+      }
+
+      alert(`${cardName} minted successfully!`);
+      window.location.href = "/cards";
+    } catch (error: any) {
+      alert(error?.reason || error?.message || "Mint failed.");
+    } finally {
+      setLoading(false);
     }
-
-    alert(`${cardName} minted successfully!`);
-    window.location.href = "/cards";
   }
 
   return (
