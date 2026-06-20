@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "wagmi";
-import { ethers } from "ethers";
+import { useAccount, useWalletClient } from "wagmi";
+import { BrowserProvider, Contract, parseEther } from "ethers";
 import {
   REVEN_CARD_ABI,
   REVEN_CARD_ADDRESS,
@@ -28,6 +28,7 @@ const priceMap: Record<string, string> = {
 export default function MintButton({ cardType, cardName }: Props) {
   const [loading, setLoading] = useState(false);
   const { address, isConnected } = useAccount();
+  const { data: walletClient } = useWalletClient();
 
   async function mintCard() {
     const stored = localStorage.getItem("reven_user");
@@ -37,7 +38,7 @@ export default function MintButton({ cardType, cardName }: Props) {
       return;
     }
 
-    if (!isConnected || !address) {
+    if (!isConnected || !address || !walletClient) {
       alert("Please connect your wallet before minting.");
       return;
     }
@@ -47,17 +48,17 @@ export default function MintButton({ cardType, cardName }: Props) {
 
       const user = JSON.parse(stored);
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      const provider = new BrowserProvider(walletClient.transport);
+      const signer = await provider.getSigner(address);
 
-      const contract = new ethers.Contract(
+      const contract = new Contract(
         REVEN_CARD_ADDRESS,
         REVEN_CARD_ABI,
         signer
       );
 
       const tx = await contract.mint(cardTypeMap[cardType], {
-        value: ethers.parseEther(priceMap[cardType]),
+        value: parseEther(priceMap[cardType]),
       });
 
       const receipt = await tx.wait();
@@ -97,7 +98,7 @@ export default function MintButton({ cardType, cardName }: Props) {
       alert(`${cardName} minted successfully!`);
       window.location.href = "/cards";
     } catch (error: any) {
-      alert(error?.reason || error?.message || "Mint failed.");
+      alert(error?.shortMessage || error?.reason || error?.message || "Mint failed.");
     } finally {
       setLoading(false);
     }
