@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { createTransactionNotification } from "@/lib/createTransactionNotification";
 
 const CONTRACT_ADDRESS = "0x3e384fBB92bd1Ba071aEc712C268FbB513D47110";
 
@@ -47,6 +48,31 @@ export async function POST(req: Request) {
       tx_hash: txHash,
       status: "completed",
     });
+
+    await createTransactionNotification({
+  userId,
+  title: "🎉 Card Minted",
+  message: `Your ${cardType} card has been minted successfully.
+
+Wallet: ${walletAddress}
+
+Transaction: ${txHash}`,
+});
+
+    const { data: existingWallet } = await supabaseAdmin
+  .from("wallets")
+  .select("id")
+  .eq("user_id", userId)
+  .eq("wallet_address", walletAddress)
+  .maybeSingle();
+
+if (!existingWallet) {
+  await supabaseAdmin.from("wallets").insert({
+    user_id: userId,
+    wallet_address: walletAddress,
+    is_primary: true,
+  });
+}
 
     return NextResponse.json({
       success: true,

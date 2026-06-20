@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "dev": "tsx bot.ts",
+    "start": "tsx bot.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "latest",
+    "dotenv": "latest",
+    "telegraf": "latest",
+    "tsx": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}

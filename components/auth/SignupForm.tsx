@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 export default function SignupForm() {
-  const [username, setUsername] = useState("");
+  
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -20,7 +20,6 @@ export default function SignupForm() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-  username,
   fullName,
   password,
   otp,
@@ -39,12 +38,12 @@ export default function SignupForm() {
 
   return (
     <form onSubmit={handleSignup} className="mt-8 space-y-4">
-      <input
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        placeholder="Username"
-        className="w-full rounded-2xl border border-white/10 bg-black px-5 py-4 outline-none focus:border-emerald-400"
-      />
+
+<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-300">
+  Verify yourself first using the <strong>Reven Verify Bot</strong> on Telegram.
+  After entering the OTP below, your Telegram username will automatically become
+  your Reven username.
+</div>
 
       <input
         value={fullName}

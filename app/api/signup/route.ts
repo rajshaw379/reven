@@ -4,14 +4,14 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function POST(req: Request) {
   try {
-    const { username, fullName, password, otp } = await req.json();
+    const { fullName, password, otp } = await req.json();
 
-    if (!username || !fullName || !password || !otp) {
-      return NextResponse.json(
-        { error: "Username, full name, password, and OTP are required." },
-        { status: 400 }
-      );
-    }
+    if (!fullName || !password || !otp) {
+  return NextResponse.json(
+    { error: "Full name, password and OTP are required." },
+    { status: 400 }
+  );
+}
 
     const { data: sessions, error: sessionError } = await supabaseAdmin
       .from("verification_sessions")
@@ -46,35 +46,88 @@ export async function POST(req: Request) {
       );
     }
 
+    const username =
+  matchedSession.telegram_username?.trim()
+    ? matchedSession.telegram_username
+    : `tg_${matchedSession.telegram_id}`;
+
+    const { data: usernameExists } = await supabaseAdmin
+  .from("users")
+  .select("id")
+  .eq("username", username)
+  .maybeSingle();
+
+if (usernameExists) {
+  return NextResponse.json(
+    {
+      error:
+        "Your Telegram username is already being used. Please change your Telegram username and try again.",
+    },
+    { status: 400 }
+  );
+}
+
+    const { data: existingTelegram } = await supabaseAdmin
+  .from("telegram_accounts")
+  .select("id")
+  .eq("telegram_id", matchedSession.telegram_id)
+  .maybeSingle();
+
+if (existingTelegram) {
+  return NextResponse.json(
+    {
+      error: "This Telegram account is already registered.",
+    },
+    { status: 400 }
+  );
+}
+
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const { data: user, error: userError } = await supabaseAdmin
-      .from("users")
-      .insert({
-        username,
-        full_name: fullName,
-        password_hash: passwordHash,
-        status: "active",
-        telegram_id: matchedSession.telegram_id,
-        telegram_username: matchedSession.telegram_username,
-      })
-      .select()
-      .single();
+// Create the user
+const { data: user, error: userError } = await supabaseAdmin
+  .from("users")
+  .insert({
+    username,
+    full_name: fullName,
+    password_hash: passwordHash,
+  })
+  .select()
+  .single();
 
-    if (userError) {
-      return NextResponse.json({ error: userError.message }, { status: 400 });
-    }
+if (userError) {
+  return NextResponse.json(
+    { error: userError.message },
+    { status: 400 }
+  );
+}
 
-    await supabaseAdmin
-      .from("verification_sessions")
-      .update({
-        status: "verified",
-        verified: true,
-        verified_at: new Date().toISOString(),
-      })
-      .eq("id", matchedSession.id);
+// Link the Telegram account
+const { error: telegramError } = await supabaseAdmin
+  .from("telegram_accounts")
+  .insert({
+    user_id: user.id,
+    telegram_id: matchedSession.telegram_id,
+    telegram_username: matchedSession.telegram_username,
+    verified: true,
+  });
 
-    return NextResponse.json({ user });
+if (telegramError) {
+  return NextResponse.json(
+    { error: telegramError.message },
+    { status: 400 }
+  );
+}
+
+// Mark OTP as used
+await supabaseAdmin
+  .from("verification_sessions")
+  .update({
+    verified: true,
+  })
+  .eq("id", matchedSession.id);
+
+return NextResponse.json({ user });
   } catch {
     return NextResponse.json({ error: "Signup failed." }, { status: 500 });
   }
