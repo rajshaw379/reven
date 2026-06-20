@@ -21,6 +21,15 @@ export default function ReloadButton({ tokenId }: { tokenId: number }) {
     try {
       setLoading(true);
       await reloadCard(walletClient, tokenId, amount);
+      await fetch("/api/cards/activate", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    tokenId,
+  }),
+});
       alert("Reload successful!");
       window.location.reload();
     } catch (error: any) {
