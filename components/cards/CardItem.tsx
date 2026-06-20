@@ -1,7 +1,7 @@
 import GlassCard from "@/components/ui/GlassCard";
-import Button from "@/components/ui/Button";
 import CardBalance from "@/components/cards/CardBalance";
 import ReloadButton from "@/components/cards/ReloadButton";
+import WithdrawButton from "@/components/cards/WithdrawButton";
 
 export default function CardItem({ card }: { card: any }) {
   return (
@@ -43,9 +43,7 @@ export default function CardItem({ card }: { card: any }) {
       <div className="mt-8 grid grid-cols-2 gap-3">
   <ReloadButton tokenId={Number(card.token_id)} />
 
-  <Button href="/dashboard" variant="secondary">
-    Manage
-  </Button>
+  <WithdrawButton tokenId={Number(card.token_id)} />
 </div>
     </GlassCard>
   );
