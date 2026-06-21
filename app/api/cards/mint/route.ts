@@ -9,6 +9,56 @@ export async function POST(req: Request) {
     const { userId, cardType, walletAddress, tokenId, txHash } =
       await req.json();
 
+      const { data: user } = await supabaseAdmin
+  .from("users")
+  .select("full_name")
+  .eq("id", userId)
+  .single();
+
+  function generateCardNumber() {
+  const bin = "453298"; // Visa-style BIN
+
+  let number = bin;
+
+  while (number.length < 15) {
+    number += Math.floor(Math.random() * 10);
+  }
+
+  // Luhn checksum
+  let sum = 0;
+  let shouldDouble = true;
+
+  for (let i = number.length - 1; i >= 0; i--) {
+    let digit = parseInt(number[i]);
+
+    if (shouldDouble) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+
+    sum += digit;
+    shouldDouble = !shouldDouble;
+  }
+
+  const checkDigit = (10 - (sum % 10)) % 10;
+
+  return number + checkDigit;
+}
+
+const cardNumber = generateCardNumber();
+
+const cvv = Math.floor(
+  100 + Math.random() * 900
+).toString();
+
+const expiry = new Date();
+expiry.setFullYear(expiry.getFullYear() + 5);
+
+const expiryDate =
+  String(expiry.getMonth() + 1).padStart(2, "0") +
+  "/" +
+  String(expiry.getFullYear()).slice(-2);
+
     if (!userId || !cardType || !walletAddress || !tokenId || !txHash) {
       return NextResponse.json(
         { error: "Missing required mint data." },
@@ -28,6 +78,10 @@ export async function POST(req: Request) {
         user_id: userId,
         wallet_address: walletAddress,
         token_id: Number(tokenId),
+        card_holder_name: user?.full_name ?? "Card Holder",
+card_number: cardNumber,
+cvv,
+expiry_date: expiryDate,
         card_type: cardType,
         status: cardType === "free" ? "locked" : "active",
         activation_code: activationCode,
