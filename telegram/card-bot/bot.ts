@@ -179,19 +179,17 @@ bot.action("cards", async (ctx) => {
 
   const telegramId = String(ctx.from.id);
 
-  // Find linked account
-  const { data: account, error: accountError } = await supabase
+  const { data: account } = await supabase
     .from("telegram_accounts")
     .select("user_id")
     .eq("telegram_id", telegramId)
     .single();
 
-  if (accountError || !account) {
+  if (!account) {
     await ctx.reply("❌ Account not linked.");
     return;
   }
 
-  // Get the latest card
   const { data: card } = await supabase
     .from("cards")
     .select("*")
@@ -201,41 +199,104 @@ bot.action("cards", async (ctx) => {
     .maybeSingle();
 
   if (!card) {
-    await ctx.reply(
-`💳 My Card
+    await ctx.reply(`💳 My Card
 
 You don't have any card yet.
 
-Visit the Reven website and mint your first card.`
-    );
+Visit the Reven website and mint your first card.`);
     return;
   }
 
-  const wallet =
-    card.wallet_address.length > 12
-      ? `${card.wallet_address.slice(0, 6)}...${card.wallet_address.slice(-4)}`
-      : card.wallet_address;
+  const { data: balance } = await supabase
+    .from("card_balances")
+    .select("locked")
+    .eq("card_id", card.id)
+    .maybeSingle();
+
+  const cardNumber = card.card_number || "0000000000000000";
+  const maskedCardNumber = `**** **** **** ${cardNumber.slice(-4)}`;
 
   await ctx.reply(
 `💳 Reven Card
 
-🆔 Token ID
-${card.token_id ?? "Not Minted"}
+👤 Card Holder
+${card.card_holder_name || "Card Holder"}
 
-🎖 Card Type
-${card.card_type}
+💳 Card Number
+${maskedCardNumber}
+
+🔐 CVV
+***
+
+📅 Expiry
+**/**
 
 📍 Status
 ${card.status}
 
-👛 Wallet
-${wallet}
+🔒 Locked
+${balance?.locked ? "Yes" : "No"}`,
+    Markup.inlineKeyboard([
+      [Markup.button.callback("👁 Show Full Details", `show_full_card:${card.id}`)]
+    ])
+  );
+});
 
-🔗 Telegram Linked
-${card.telegram_linked ? "✅ Yes" : "❌ No"}
+bot.action(/^show_full_card:(.+)$/, async (ctx) => {
+  await ctx.answerCbQuery();
 
-📅 Created
-${new Date(card.created_at).toLocaleDateString()}`
+  const cardId = ctx.match[1];
+  const telegramId = String(ctx.from.id);
+
+  const { data: account } = await supabase
+    .from("telegram_accounts")
+    .select("user_id")
+    .eq("telegram_id", telegramId)
+    .single();
+
+  if (!account) {
+    await ctx.reply("❌ Account not linked.");
+    return;
+  }
+
+  const { data: card } = await supabase
+    .from("cards")
+    .select("*")
+    .eq("id", cardId)
+    .eq("user_id", account.user_id)
+    .maybeSingle();
+
+  if (!card) {
+    await ctx.reply("❌ Card not found.");
+    return;
+  }
+
+  const { data: balance } = await supabase
+    .from("card_balances")
+    .select("locked")
+    .eq("card_id", card.id)
+    .maybeSingle();
+
+  await ctx.reply(
+`👁 Full Card Details
+
+👤 Card Holder
+${card.card_holder_name || "Card Holder"}
+
+💳 Card Number
+${card.card_number || "Not available"}
+
+🔐 CVV
+${card.cvv || "Not available"}
+
+📅 Expiry
+${card.expiry_date || "Not available"}
+
+📍 Status
+${card.status}
+
+🔒 Locked
+${balance?.locked ? "Yes" : "No"}`
   );
 });
 
