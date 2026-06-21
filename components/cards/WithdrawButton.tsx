@@ -25,7 +25,18 @@ export default function WithdrawButton({ tokenId }: { tokenId: number }) {
     try {
       setLoading(true);
 
-      await withdrawFromCard(walletClient, tokenId, amount);
+      const receipt = await withdrawFromCard(walletClient, tokenId, amount);
+      await fetch("/api/cards/withdraw", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    tokenId,
+    amountEth: amount,
+    txHash: receipt.hash,
+  }),
+});
 
       alert("Withdraw successful!");
       window.location.reload();
