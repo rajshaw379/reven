@@ -1,8 +1,21 @@
 "use client";
 
+import { useDisconnect } from "wagmi";
+
 export default function LogoutButton() {
+  const { disconnect } = useDisconnect();
+
   function logout() {
+    // disconnect wallet
+    disconnect();
+
+    // remove Reven session
     localStorage.removeItem("reven_user");
+
+    // clear other cached wallet data
+    localStorage.removeItem("wagmi.store");
+    localStorage.removeItem("walletconnect");
+
     window.location.href = "/login";
   }
 
