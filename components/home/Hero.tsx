@@ -1,6 +1,6 @@
 export default function Hero() {
   return (
-    <section className="mx-auto grid min-h-[calc(100svh-72px)] max-w-7xl items-center gap-10 px-5 py-16 sm:px-6 md:grid-cols-2 md:gap-12 md:py-24 lg:py-28">
+    <section className="mx-auto grid max-w-7xl gap-10 px-5 pb-12 pt-10 sm:px-6 sm:pb-16 sm:pt-14 md:grid-cols-2 md:items-center md:gap-12 md:pb-20 md:pt-24">
       <div>
         <p className="mb-4 inline-flex rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs text-emerald-300 sm:px-4 sm:py-2 sm:text-sm">
           Sepolia Testnet Crypto Card Ecosystem
@@ -20,7 +20,7 @@ export default function Hero() {
         </p>
       </div>
 
-      <div className="relative mx-auto w-full max-w-[340px] sm:max-w-md">
+      <div className="relative mx-auto w-full max-w-[360px] sm:max-w-md">
         <div className="absolute inset-0 rounded-[2rem] bg-emerald-400/20 blur-3xl" />
 
         <div className="relative rotate-2 rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-900 via-emerald-950 to-black p-6 shadow-2xl sm:p-8">
