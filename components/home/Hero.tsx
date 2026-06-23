@@ -1,12 +1,12 @@
 export default function Hero() {
   return (
-    <section className="mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-6 pb-20 pt-32 md:grid-cols-2">
+    <section className="mx-auto grid min-h-[calc(100svh-72px)] max-w-7xl items-center gap-10 px-5 py-16 sm:px-6 md:grid-cols-2 md:gap-12 md:py-24 lg:py-28">
       <div>
-        <p className="mb-5 inline-flex rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-300">
+        <p className="mb-4 inline-flex rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs text-emerald-300 sm:px-4 sm:py-2 sm:text-sm">
           Sepolia Testnet Crypto Card Ecosystem
         </p>
 
-        <h1 className="text-5xl font-bold tracking-tight md:text-7xl">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
           The Future of
           <span className="block bg-gradient-to-r from-emerald-300 to-cyan-300 bg-clip-text text-transparent">
             Crypto Cards
@@ -14,22 +14,32 @@ export default function Hero() {
           Starts Here
         </h1>
 
-        <p className="mt-6 max-w-xl text-base leading-8 text-zinc-400 md:text-xl">
+        <p className="mt-5 max-w-xl text-sm leading-7 text-zinc-400 sm:text-base md:text-lg lg:text-xl">
           Mint NFT-backed crypto cards, manage balances on-chain, and receive
           secure Telegram notifications for every reload and withdrawal.
         </p>
       </div>
 
-      <div className="relative mx-auto w-full max-w-md">
+      <div className="relative mx-auto w-full max-w-[340px] sm:max-w-md">
         <div className="absolute inset-0 rounded-[2rem] bg-emerald-400/20 blur-3xl" />
-        <div className="relative rotate-3 rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-900 via-emerald-950 to-black p-8 shadow-2xl">
-          <div className="flex justify-between text-sm text-zinc-400">
+
+        <div className="relative rotate-2 rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-900 via-emerald-950 to-black p-6 shadow-2xl sm:p-8">
+          <div className="flex justify-between text-xs text-zinc-400 sm:text-sm">
             <span>REVEN</span>
             <span>SEPOLIA</span>
           </div>
-          <div className="mt-20 text-3xl font-bold">Reven Card</div>
-          <div className="mt-3 text-emerald-300">NFT • Vault • Telegram</div>
-          <div className="mt-16 text-xl tracking-[0.35em]">4386 **** 9823</div>
+
+          <div className="mt-14 text-2xl font-bold sm:mt-20 sm:text-3xl">
+            Reven Card
+          </div>
+
+          <div className="mt-3 text-sm text-emerald-300 sm:text-base">
+            NFT • Vault • Telegram
+          </div>
+
+          <div className="mt-12 text-sm tracking-[0.3em] sm:mt-16 sm:text-xl sm:tracking-[0.35em]">
+            4386 **** 9823
+          </div>
         </div>
       </div>
     </section>
