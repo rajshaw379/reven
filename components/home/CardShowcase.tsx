@@ -11,7 +11,7 @@ export default function CardShowcase() {
         Choose your Reven Card
       </h2>
 
-      <div className="mt-8 grid grid-cols-1 gap-6 lg:mt-10 lg:grid-cols-3">
+      <div className="mx-auto mt-8 grid max-w-md grid-cols-1 gap-6 lg:mt-10 lg:max-w-none lg:grid-cols-3">
         {cards.map(([title, price, supply, desc]) => (
           <div
             key={title}
