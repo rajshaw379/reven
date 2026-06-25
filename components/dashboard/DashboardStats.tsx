@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 import { supabase } from "@/lib/supabase";
 import GlassCard from "@/components/ui/GlassCard";
 
 export default function DashboardStats() {
   const [count, setCount] = useState(0);
-  const [walletConnected, setWalletConnected] = useState(false);
+  const [savedWallet, setSavedWallet] = useState<string | null>(null);
+  const { address, isConnected } = useAccount();
 
   useEffect(() => {
     async function load() {
@@ -24,23 +26,30 @@ export default function DashboardStats() {
 
       const { data: wallet } = await supabase
         .from("wallets")
-        .select("id")
+        .select("wallet_address")
         .eq("user_id", user.id)
         .maybeSingle();
 
-      setWalletConnected(!!wallet);
+      setSavedWallet(wallet?.wallet_address ?? null);
     }
 
     load();
   }, []);
+
+  const connectedWallet = savedWallet || (isConnected ? address : null);
 
   return (
     <>
       <GlassCard className="p-6">
         <p className="text-sm text-zinc-500">Wallet</p>
         <p className="mt-3 text-2xl font-bold">
-          {walletConnected ? "Connected" : "Not Connected"}
+          {connectedWallet ? "Connected" : "Not Connected"}
         </p>
+        {connectedWallet && (
+          <p className="mt-2 truncate text-xs text-zinc-500">
+            {connectedWallet.slice(0, 6)}...{connectedWallet.slice(-4)}
+          </p>
+        )}
       </GlassCard>
 
       <GlassCard className="p-6">
