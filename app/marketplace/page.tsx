@@ -5,6 +5,7 @@ import SectionTitle from "@/components/ui/SectionTitle";
 import { getMarketplaceCards } from "@/lib/marketplace";
 import MintButton from "@/components/marketplace/MintButton";
 import WalletConnectButton from "@/components/wallet/WalletConnectButton";
+import RevenCard from "@/components/cards/RevenCard";
 
 export default async function MarketplacePage() {
   const cards = await getMarketplaceCards();
@@ -27,18 +28,23 @@ export default async function MarketplacePage() {
   <WalletConnectButton />
 </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {cards.map((card: any) => (
             <GlassCard key={card.id} className="p-6">
-              <div className="h-48 rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900 via-emerald-950 to-black p-5">
-                <div className="flex justify-between text-sm text-zinc-400">
-                  <span>REVEN</span>
-                  <span>{card.network}</span>
-                </div>
-
-                <p className="mt-20 text-2xl font-bold">{card.name}</p>
-                <p className="mt-2 text-sm text-emerald-300">ERC-721 NFT</p>
-              </div>
+              <RevenCard
+  card={{
+    card_type: card.card_type,
+    status: card.card_type === "free" ? "locked" : "active",
+    card_number:
+      card.card_type === "physical"
+        ? "xxxxxxxxxxxx1098"
+        : card.card_type === "free"
+        ? "xxxxxxxxxxxx0000"
+        : "xxxxxxxxxxxx7890",
+    card_holder_name: "YOUR NAME",
+    expiry_date: "xx/xx",
+  }}
+/>
 
               <h2 className="mt-8 text-2xl font-bold">{card.name}</h2>
 
@@ -66,7 +72,7 @@ export default async function MarketplacePage() {
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Status</span>
                   <span className="text-emerald-300 capitalize">
-                    {card.status}
+                    {card.card_type === "free" ? "Locked" : "Available"}
                   </span>
                 </div>
               </div>

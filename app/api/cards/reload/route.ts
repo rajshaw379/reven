@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
     const { data: card, error: cardError } = await supabaseAdmin
       .from("cards")
-      .select("id,user_id,card_type")
+      .select("id,user_id,card_type,status")
       .eq("token_id", Number(tokenId))
       .single();
 
@@ -36,6 +36,16 @@ export async function POST(req: Request) {
         locked: false,
         updated_at: new Date().toISOString(),
       });
+
+      if (card.card_type === "free" && card.status === "locked") {
+  await supabaseAdmin
+    .from("cards")
+    .update({
+      status: "active",
+      activation_used: true,
+    })
+    .eq("id", card.id);
+}
 
     await supabaseAdmin.from("transactions").insert({
       card_id: card.id,

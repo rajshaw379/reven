@@ -2,12 +2,26 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createTransactionNotification } from "@/lib/createTransactionNotification";
 
-const CONTRACT_ADDRESS = "0x3e384fBB92bd1Ba071aEc712C268FbB513D47110";
+const CONTRACT_ADDRESS = "0x7e983b7821B2dc9928AFC926E8406cB1a8002156";
 
 export async function POST(req: Request) {
   try {
-    const { userId, cardType, walletAddress, tokenId, txHash } =
-      await req.json();
+    const {
+  userId,
+  cardType,
+  walletAddress,
+  tokenId,
+  txHash,
+  cardHolderName,
+  couponCode,
+  shippingName,
+  shippingAddress,
+  shippingCity,
+  shippingState,
+  shippingCountry,
+  shippingPostalCode,
+  finalPriceEth,
+} = await req.json();
 
       const { data: user } = await supabaseAdmin
   .from("users")
@@ -78,7 +92,16 @@ const expiryDate =
         user_id: userId,
         wallet_address: walletAddress,
         token_id: Number(tokenId),
-        card_holder_name: user?.full_name ?? "Card Holder",
+        contract_address: CONTRACT_ADDRESS,
+        card_holder_name: cardHolderName || user?.full_name || "Card Holder",
+shipping_name: shippingName,
+shipping_address: shippingAddress,
+shipping_city: shippingCity,
+shipping_state: shippingState,
+shipping_country: shippingCountry,
+shipping_postal_code: shippingPostalCode,
+coupon_code: couponCode,
+final_price_eth: finalPriceEth,
 card_number: cardNumber,
 cvv,
 expiry_date: expiryDate,
@@ -94,6 +117,20 @@ expiry_date: expiryDate,
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+
+    if (cardType === "physical") {
+  await supabaseAdmin.from("physical_card_orders").insert({
+    card_id: data.id,
+    user_id: userId,
+    shipping_name: shippingName,
+    shipping_address: shippingAddress,
+    shipping_city: shippingCity,
+    shipping_state: shippingState,
+    shipping_country: shippingCountry,
+    shipping_postal_code: shippingPostalCode,
+    shipping_status: "preparing",
+  });
+}
 
     await supabaseAdmin.from("transactions").insert({
       card_id: data.id,

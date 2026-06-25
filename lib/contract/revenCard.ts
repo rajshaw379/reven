@@ -1,21 +1,34 @@
 export const REVEN_CARD_ADDRESS =
-  "0x3e384fBB92bd1Ba071aEc712C268FbB513D47110";
+  "0x7e983b7821B2dc9928AFC926E8406cB1a8002156";
 
   export const REVEN_CARD_ABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "bytes32",
-				"name": "role",
-				"type": "bytes32"
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
 			},
 			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
 			}
 		],
-		"name": "grantRole",
+		"name": "approve",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "code",
+				"type": "string"
+			}
+		],
+		"name": "disableCoupon",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -33,24 +46,31 @@ export const REVEN_CARD_ADDRESS =
 	},
 	{
 		"inputs": [],
-		"name": "AccessControlBadConfirmation",
+		"name": "BadCoupon",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "BadPayment",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "BelowMinted",
 		"type": "error"
 	},
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			},
-			{
-				"internalType": "bytes32",
-				"name": "neededRole",
-				"type": "bytes32"
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
 			}
 		],
-		"name": "AccessControlUnauthorizedAccount",
-		"type": "error"
+		"name": "burn",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -230,6 +250,58 @@ export const REVEN_CARD_ADDRESS =
 		"type": "error"
 	},
 	{
+		"inputs": [],
+		"name": "FreeCouponBlocked",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidLimit",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotOwnerOfToken",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "OwnableInvalidOwner",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "OwnableUnauthorizedAccount",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "SoldOut",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "TypePaused",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "WalletLimit",
+		"type": "error"
+	},
+	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -280,37 +352,6 @@ export const REVEN_CARD_ADDRESS =
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "approve",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "burn",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -327,9 +368,15 @@ export const REVEN_CARD_ADDRESS =
 			},
 			{
 				"indexed": false,
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "cardType",
 				"type": "uint8"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "paid",
+				"type": "uint256"
 			}
 		],
 		"name": "CardMinted",
@@ -346,12 +393,31 @@ export const REVEN_CARD_ADDRESS =
 			},
 			{
 				"indexed": false,
-				"internalType": "enum RevenCard.CardStatus",
+				"internalType": "enum RevenCardV2.CardStatus",
 				"name": "status",
 				"type": "uint8"
 			}
 		],
 		"name": "CardStatusUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "cardType",
+				"type": "uint8"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "paused",
+				"type": "bool"
+			}
+		],
+		"name": "CardTypePaused",
 		"type": "event"
 	},
 	{
@@ -365,13 +431,13 @@ export const REVEN_CARD_ADDRESS =
 			},
 			{
 				"indexed": false,
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "oldType",
 				"type": "uint8"
 			},
 			{
 				"indexed": false,
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "newType",
 				"type": "uint8"
 			}
@@ -380,9 +446,66 @@ export const REVEN_CARD_ADDRESS =
 		"type": "event"
 	},
 	{
+		"anonymous": false,
 		"inputs": [
 			{
-				"internalType": "enum RevenCard.CardType",
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "couponHash",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "active",
+				"type": "bool"
+			}
+		],
+		"name": "CouponUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "couponHash",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "discount",
+				"type": "uint256"
+			}
+		],
+		"name": "CouponUsed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "supply",
+				"type": "uint256"
+			}
+		],
+		"name": "MaxSupplyChanged",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "cardType",
 				"type": "uint8"
 			}
@@ -391,6 +514,43 @@ export const REVEN_CARD_ADDRESS =
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "cardType",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "code",
+				"type": "string"
+			}
+		],
+		"name": "mintWithCoupon",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -417,7 +577,7 @@ export const REVEN_CARD_ADDRESS =
 		"inputs": [
 			{
 				"indexed": false,
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "cardType",
 				"type": "uint8"
 			},
@@ -432,19 +592,8 @@ export const REVEN_CARD_ADDRESS =
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "role",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "address",
-				"name": "callerConfirmation",
-				"type": "address"
-			}
-		],
-		"name": "renounceRole",
+		"inputs": [],
+		"name": "renounceOwnership",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -452,95 +601,20 @@ export const REVEN_CARD_ADDRESS =
 	{
 		"inputs": [
 			{
-				"internalType": "bytes32",
-				"name": "role",
-				"type": "bytes32"
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
 			},
 			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "cardType",
+				"type": "uint8"
 			}
 		],
-		"name": "revokeRole",
+		"name": "reserveMint",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "bytes32",
-				"name": "role",
-				"type": "bytes32"
-			},
-			{
-				"indexed": true,
-				"internalType": "bytes32",
-				"name": "previousAdminRole",
-				"type": "bytes32"
-			},
-			{
-				"indexed": true,
-				"internalType": "bytes32",
-				"name": "newAdminRole",
-				"type": "bytes32"
-			}
-		],
-		"name": "RoleAdminChanged",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "bytes32",
-				"name": "role",
-				"type": "bytes32"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "sender",
-				"type": "address"
-			}
-		],
-		"name": "RoleGranted",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "bytes32",
-				"name": "role",
-				"type": "bytes32"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "sender",
-				"type": "address"
-			}
-		],
-		"name": "RoleRevoked",
-		"type": "event"
 	},
 	{
 		"inputs": [
@@ -619,7 +693,7 @@ export const REVEN_CARD_ADDRESS =
 				"type": "uint256"
 			},
 			{
-				"internalType": "enum RevenCard.CardStatus",
+				"internalType": "enum RevenCardV2.CardStatus",
 				"name": "status",
 				"type": "uint8"
 			}
@@ -632,13 +706,87 @@ export const REVEN_CARD_ADDRESS =
 	{
 		"inputs": [
 			{
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "cardType",
+				"type": "uint8"
+			},
+			{
+				"internalType": "bool",
+				"name": "paused",
+				"type": "bool"
+			}
+		],
+		"name": "setCardTypePaused",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "code",
+				"type": "string"
+			},
+			{
+				"internalType": "bool",
+				"name": "active",
+				"type": "bool"
+			},
+			{
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "cardType",
+				"type": "uint8"
+			},
+			{
+				"internalType": "bool",
+				"name": "allPaid",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint16",
+				"name": "discountBps",
+				"type": "uint16"
+			},
+			{
+				"internalType": "uint32",
+				"name": "maxUses",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint64",
+				"name": "expiresAt",
+				"type": "uint64"
+			}
+		],
+		"name": "setCoupon",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "supply",
+				"type": "uint256"
+			}
+		],
+		"name": "setMaxSupply",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "cardType",
 				"type": "uint8"
 			},
 			{
 				"internalType": "uint256",
-				"name": "newPrice",
+				"name": "price",
 				"type": "uint256"
 			}
 		],
@@ -650,13 +798,49 @@ export const REVEN_CARD_ADDRESS =
 	{
 		"inputs": [
 			{
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "address",
+				"name": "receiver",
+				"type": "address"
+			},
+			{
+				"internalType": "uint96",
+				"name": "feeNumerator",
+				"type": "uint96"
+			}
+		],
+		"name": "setRoyalty",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "cardType",
 				"type": "uint8"
 			},
 			{
 				"internalType": "uint256",
-				"name": "newLimit",
+				"name": "supply",
+				"type": "uint256"
+			}
+		],
+		"name": "setTypeMaxSupply",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "cardType",
+				"type": "uint8"
+			},
+			{
+				"internalType": "uint256",
+				"name": "limit",
 				"type": "uint256"
 			}
 		],
@@ -721,6 +905,38 @@ export const REVEN_CARD_ADDRESS =
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "cardType",
+				"type": "uint8"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "supply",
+				"type": "uint256"
+			}
+		],
+		"name": "TypeSupplyChanged",
+		"type": "event"
+	},
+	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -751,7 +967,7 @@ export const REVEN_CARD_ADDRESS =
 		"inputs": [
 			{
 				"indexed": false,
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "cardType",
 				"type": "uint8"
 			},
@@ -773,16 +989,16 @@ export const REVEN_CARD_ADDRESS =
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "ADMIN_ROLE",
-		"outputs": [
+		"inputs": [
 			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
+				"internalType": "address payable",
+				"name": "receiver",
+				"type": "address"
 			}
 		],
-		"stateMutability": "view",
+		"name": "withdrawTo",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -815,9 +1031,28 @@ export const REVEN_CARD_ADDRESS =
 		"name": "cardStatuses",
 		"outputs": [
 			{
-				"internalType": "enum RevenCard.CardStatus",
+				"internalType": "enum RevenCardV2.CardStatus",
 				"name": "",
 				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"name": "cardTypePaused",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -834,7 +1069,7 @@ export const REVEN_CARD_ADDRESS =
 		"name": "cardTypes",
 		"outputs": [
 			{
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "",
 				"type": "uint8"
 			}
@@ -843,8 +1078,14 @@ export const REVEN_CARD_ADDRESS =
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "DEFAULT_ADMIN_ROLE",
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "code",
+				"type": "string"
+			}
+		],
+		"name": "couponHash",
 		"outputs": [
 			{
 				"internalType": "bytes32",
@@ -852,56 +1093,53 @@ export const REVEN_CARD_ADDRESS =
 				"type": "bytes32"
 			}
 		],
-		"stateMutability": "view",
+		"stateMutability": "pure",
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "FREE_SUPPLY",
-		"outputs": [
+		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "bytes32",
 				"name": "",
-				"type": "uint256"
+				"type": "bytes32"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "freeMinted",
+		"name": "coupons",
 		"outputs": [
 			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "freeMintLimitPerWallet",
-		"outputs": [
+				"internalType": "bool",
+				"name": "active",
+				"type": "bool"
+			},
 			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "freePrice",
-		"outputs": [
+				"internalType": "bool",
+				"name": "allPaid",
+				"type": "bool"
+			},
 			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "cardType",
+				"type": "uint8"
+			},
+			{
+				"internalType": "uint16",
+				"name": "discountBps",
+				"type": "uint16"
+			},
+			{
+				"internalType": "uint32",
+				"name": "maxUses",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "usedCount",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint64",
+				"name": "expiresAt",
+				"type": "uint64"
 			}
 		],
 		"stateMutability": "view",
@@ -929,26 +1167,31 @@ export const REVEN_CARD_ADDRESS =
 	{
 		"inputs": [
 			{
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "cardType",
 				"type": "uint8"
-			}
-		],
-		"name": "getCardTypeName",
-		"outputs": [
+			},
 			{
 				"internalType": "string",
-				"name": "",
+				"name": "code",
 				"type": "string"
 			}
 		],
-		"stateMutability": "pure",
+		"name": "getDiscountedPrice",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
 			{
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "cardType",
 				"type": "uint8"
 			}
@@ -967,45 +1210,7 @@ export const REVEN_CARD_ADDRESS =
 	{
 		"inputs": [
 			{
-				"internalType": "bytes32",
-				"name": "role",
-				"type": "bytes32"
-			}
-		],
-		"name": "getRoleAdmin",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "enum RevenCard.CardStatus",
-				"name": "status",
-				"type": "uint8"
-			}
-		],
-		"name": "getStatusName",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"stateMutability": "pure",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "cardType",
 				"type": "uint8"
 			}
@@ -1016,30 +1221,6 @@ export const REVEN_CARD_ADDRESS =
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "role",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "hasRole",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -1071,7 +1252,45 @@ export const REVEN_CARD_ADDRESS =
 	},
 	{
 		"inputs": [],
-		"name": "MAX_SUPPLY",
+		"name": "maxSupply",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"name": "maxSupplyByType",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "enum RevenCardV2.CardType",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"name": "mintedByType",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -1090,6 +1309,19 @@ export const REVEN_CARD_ADDRESS =
 				"internalType": "string",
 				"name": "",
 				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -1128,47 +1360,14 @@ export const REVEN_CARD_ADDRESS =
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "PHYSICAL_SUPPLY",
-		"outputs": [
+		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "",
-				"type": "uint256"
+				"type": "uint8"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "physicalMinted",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "physicalMintLimitPerWallet",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "physicalPrice",
+		"name": "priceByType",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -1273,47 +1472,14 @@ export const REVEN_CARD_ADDRESS =
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "VIRTUAL_SUPPLY",
-		"outputs": [
+		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "",
-				"type": "uint256"
+				"type": "uint8"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "virtualMinted",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "virtualMintLimitPerWallet",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "virtualPrice",
+		"name": "walletLimitByType",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -1332,7 +1498,7 @@ export const REVEN_CARD_ADDRESS =
 				"type": "address"
 			},
 			{
-				"internalType": "enum RevenCard.CardType",
+				"internalType": "enum RevenCardV2.CardType",
 				"name": "",
 				"type": "uint8"
 			}

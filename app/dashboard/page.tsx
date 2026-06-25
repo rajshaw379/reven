@@ -9,6 +9,7 @@ import WelcomeUser from "@/components/dashboard/WelcomeUser";
 import RequireLogin from "@/components/auth/RequireLogin";
 import LogoutButton from "@/components/auth/LogoutButton";
 import DashboardStats from "@/components/dashboard/DashboardStats";
+import RevenCard from "@/components/cards/RevenCard";
 
 export default function DashboardPage() {
   const [cards, setCards] = useState<any[]>([]);
@@ -74,35 +75,24 @@ export default function DashboardPage() {
                 <p className="text-zinc-400">You don't have any cards yet.</p>
               ) : (
                 cards.map((card: any) => (
-  <a key={card.id} href="/cards" className="block">
-    <GlassCard className="p-6 transition hover:border-emerald-400/40 hover:bg-white/[0.06]">
-      <div className="h-40 rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900 via-emerald-950 to-black p-5">
-        <div className="flex justify-between text-sm text-zinc-400">
-          <span>REVEN</span>
-          <span>VISA</span>
-        </div>
+  <a key={card.id} href={`/cards/${card.token_id}`} className="block">
+  <GlassCard className="overflow-hidden p-0 transition hover:border-emerald-400/40 hover:bg-white/[0.06]">
+    <RevenCard card={card} />
 
-        <p className="mt-14 text-xl font-bold capitalize">
-          {card.card_type} Card
-        </p>
-
-        <p className="mt-2 text-sm text-emerald-300">
-          **** **** **** {card.card_number?.slice(-4) || "----"}
-        </p>
-      </div>
-
-      <div className="mt-6 flex justify-between">
+    <div className="p-6">
+      <div className="flex justify-between">
         <span className="text-zinc-500">Status</span>
-        <span className="text-emerald-300">{card.status}</span>
+        <span className="capitalize text-emerald-300">{card.status}</span>
       </div>
 
       <p className="mt-4 text-sm text-zinc-500">
         Click to manage reload and withdraw.
       </p>
-    </GlassCard>
-  </a>
-))
-              )}
+    </div>
+  </GlassCard>
+</a>
+              ))
+            )}
             </div>
           </section>
 
