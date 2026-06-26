@@ -1,5 +1,5 @@
 export const REVEN_VAULT_ADDRESS =
-  "0x5b353EB696A9D73812D0723FC325203dfBAaAe7C";
+  "0xfa09520efc9523F37cBdD0309490C6b1AAA89762";
 
   export const REVEN_VAULT_ABI = [
 	{
@@ -101,6 +101,32 @@ export const REVEN_VAULT_ADDRESS =
 		"type": "event"
 	},
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "admin",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "EmergencyWithdraw",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "emergencyWithdrawAll",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -168,6 +194,19 @@ export const REVEN_VAULT_ADDRESS =
 		"anonymous": false,
 		"inputs": [
 			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "enabled",
+				"type": "bool"
+			}
+		],
+		"name": "ReloadEnabledChanged",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
 				"indexed": true,
 				"internalType": "uint256",
 				"name": "tokenId",
@@ -218,6 +257,25 @@ export const REVEN_VAULT_ADDRESS =
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "oldCard",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newCard",
+				"type": "address"
+			}
+		],
+		"name": "RevenCardUpdated",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -347,6 +405,45 @@ export const REVEN_VAULT_ADDRESS =
 	{
 		"inputs": [
 			{
+				"internalType": "bool",
+				"name": "enabled",
+				"type": "bool"
+			}
+		],
+		"name": "setReloadEnabled",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newCardAddress",
+				"type": "address"
+			}
+		],
+		"name": "setRevenCard",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bool",
+				"name": "enabled",
+				"type": "bool"
+			}
+		],
+		"name": "setWithdrawEnabled",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "uint256",
 				"name": "feeBps",
 				"type": "uint256"
@@ -407,6 +504,19 @@ export const REVEN_VAULT_ADDRESS =
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "enabled",
+				"type": "bool"
+			}
+		],
+		"name": "WithdrawEnabledChanged",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -636,6 +746,19 @@ export const REVEN_VAULT_ADDRESS =
 	},
 	{
 		"inputs": [],
+		"name": "reloadEnabled",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "revenCard",
 		"outputs": [
 			{
@@ -680,6 +803,19 @@ export const REVEN_VAULT_ADDRESS =
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "withdrawEnabled",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
