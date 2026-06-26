@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 import { BrowserProvider, Contract, parseEther } from "ethers";
+import PurchaseSuccessModal from "@/components/marketplace/PurchaseSuccessModal";
 import {
   REVEN_CARD_ABI,
   REVEN_CARD_ADDRESS,
@@ -41,6 +42,7 @@ export default function MintButton({ cardType, cardName }: Props) {
   const [shippingPostalCode, setShippingPostalCode] = useState("");
   const [finalPriceEth, setFinalPriceEth] = useState(priceMap[cardType]);
 const [couponApplied, setCouponApplied] = useState(false);
+const [showSuccess, setShowSuccess] = useState(false);
 
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
@@ -192,13 +194,8 @@ if (!walletCheck.ok) {
         return;
       }
 
-      toast.success(`${cardName} purchased successfully! Start Reven Card Bot for alerts.`, {
-  action: {
-    label: "Open Bot",
-    onClick: () => window.open("https://t.me/RevenCardBot", "_blank"),
-  },
-});
-      window.location.href = "/cards";
+     setOpen(false);
+setShowSuccess(true);
     } catch (error: any) {
       alert(
         error?.shortMessage ||
@@ -339,6 +336,14 @@ if (!walletCheck.ok) {
           </div>
         </div>
       )}
+      <PurchaseSuccessModal
+  open={showSuccess}
+  cardName={cardName}
+  onContinue={() => {
+    setShowSuccess(false);
+    window.location.href = "/cards";
+  }}
+/>
     </>
   );
 }

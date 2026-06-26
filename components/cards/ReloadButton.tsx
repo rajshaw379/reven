@@ -5,7 +5,13 @@ import { useWalletClient } from "wagmi";
 import { reloadCard } from "@/lib/contract/vault";
 import ReloadModal from "@/components/cards/ReloadModal";
 
-export default function ReloadButton({ tokenId }: { tokenId: number }) {
+export default function ReloadButton({
+  tokenId,
+  cardId,
+}: {
+  tokenId: number;
+  cardId?: string;
+}) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
@@ -27,20 +33,28 @@ export default function ReloadButton({ tokenId }: { tokenId: number }) {
 
       const receipt = await reloadCard(walletClient, tokenId, amount);
 
-      await fetch("/api/cards/reload", {
+      const res = await fetch("/api/cards/reload", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    tokenId,
-    amountEth: amount,
-    txHash: receipt.hash,
-  }),
+  tokenId,
+  cardId,
+  amountEth: amount,
+  txHash: receipt.hash,
+}),
 });
 
-      alert("Reload successful!");
-      window.location.reload();
+const data = await res.json();
+
+if (!res.ok) {
+  alert(data.error || "Reload transaction succeeded, but database update failed.");
+  return;
+}
+
+alert("Reload successful!");
+window.location.reload();
     } catch (error: any) {
       alert(error?.shortMessage || error?.message || "Reload failed.");
     } finally {

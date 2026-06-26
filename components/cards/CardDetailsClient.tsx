@@ -45,21 +45,26 @@ export default function CardDetailsClient({ tokenId }: { tokenId: string }) {
   .maybeSingle();
 
 const lockedFreeCard =
-  cardData.card_type === "free" && Number(balanceData?.balance_eth ?? 0) <= 0;
+  cardData.card_type === "free" && cardData.status === "locked";
 
 setCard({
   ...cardData,
   lockedFreeCard,
 });
 
-      const { data: txs } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("card_id", cardData.id)
-        .order("created_at", { ascending: false })
-        .limit(10);
+      const txRes = await fetch("/api/cards/transactions", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    cardId: cardData.id,
+  }),
+});
 
-      setTransactions(txs || []);
+const txData = await txRes.json();
+
+setTransactions(txData.transactions || []);
 
       if (cardData.card_type === "physical") {
         const { data: shippingData } = await supabase
@@ -119,8 +124,8 @@ setCard({
 />
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <ReloadButton tokenId={Number(card.token_id)} />
-              <WithdrawButton tokenId={Number(card.token_id)} />
+              <ReloadButton tokenId={Number(card.token_id)} cardId={card.id} />
+              <WithdrawButton tokenId={Number(card.token_id)} cardId={card.id} />
             </div>
           </div>
 

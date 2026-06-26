@@ -55,7 +55,7 @@ export default function CardItem({ card }: { card: any }) {
         </div>
 
         <div className="grid grid-cols-2 gap-3 pt-3">
-  <ReloadButton tokenId={Number(card.token_id)} />
+  <ReloadButton tokenId={Number(card.token_id)} cardId={card.id} />
 
   {card.card_type === "free" && card.status === "locked" ? (
     <button
@@ -65,7 +65,7 @@ export default function CardItem({ card }: { card: any }) {
       Locked
     </button>
   ) : (
-    <WithdrawButton tokenId={Number(card.token_id)} />
+    <WithdrawButton tokenId={Number(card.token_id)} cardId={card.id} />
   )}
 </div>
       </div>

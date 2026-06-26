@@ -5,7 +5,13 @@ import { useWalletClient } from "wagmi";
 import { withdrawFromCard } from "@/lib/contract/vault";
 import WithdrawModal from "@/components/cards/WithdrawModal";
 
-export default function WithdrawButton({ tokenId }: { tokenId: number }) {
+export default function WithdrawButton({
+  tokenId,
+  cardId,
+}: {
+  tokenId: number;
+  cardId?: string;
+}) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
@@ -26,20 +32,28 @@ export default function WithdrawButton({ tokenId }: { tokenId: number }) {
       setLoading(true);
 
       const receipt = await withdrawFromCard(walletClient, tokenId, amount);
-      await fetch("/api/cards/withdraw", {
+     const res = await fetch("/api/cards/withdraw", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
     tokenId,
+    cardId,
     amountEth: amount,
     txHash: receipt.hash,
   }),
 });
 
-      alert("Withdraw successful!");
-      window.location.reload();
+const data = await res.json();
+
+if (!res.ok) {
+  alert(data.error || "Withdraw transaction succeeded, but database update failed.");
+  return;
+}
+
+alert("Withdraw successful!");
+window.location.reload();
     } catch (error: any) {
       alert(error?.shortMessage || error?.message || "Withdraw failed.");
     } finally {
