@@ -6,6 +6,7 @@ import { getMarketplaceCards } from "@/lib/marketplace";
 import MintButton from "@/components/marketplace/MintButton";
 import WalletConnectButton from "@/components/wallet/WalletConnectButton";
 import RevenCard from "@/components/cards/RevenCard";
+import CardPriceUSD from "@/components/marketplace/CardPriceUSD";
 
 export default async function MarketplacePage() {
   const cards = await getMarketplaceCards();
@@ -49,9 +50,8 @@ export default async function MarketplacePage() {
               <h2 className="mt-8 text-2xl font-bold">{card.name}</h2>
 
               <p className="mt-2 text-emerald-300">
-                {Number(card.price_eth) === 0
-                  ? "Free"
-                  : `${card.price_eth} ETH`}
+                <CardPriceUSD priceEth={Number(card.price_eth)} />
+                   
               </p>
 
               <p className="mt-3 text-sm text-zinc-400">

@@ -6,6 +6,8 @@ import { BrowserProvider, Contract, formatEther, parseEther } from "ethers";
 import WalletConnectButton from "@/components/wallet/WalletConnectButton";
 import Container from "@/components/ui/Container";
 import GlassCard from "@/components/ui/GlassCard";
+import AdminOrders from "@/components/admin/AdminOrders";
+
 import {
   REVEN_CARD_ABI,
   REVEN_CARD_ADDRESS,
@@ -434,6 +436,8 @@ export default function AdminDashboardClient() {
             />
           </ButtonRow>
         </AdminSection>
+
+        <AdminOrders />
       </Container>
     </main>
   );

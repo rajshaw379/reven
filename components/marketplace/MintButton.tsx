@@ -111,6 +111,24 @@ const [couponApplied, setCouponApplied] = useState(false);
 
       const user = JSON.parse(stored);
 
+      const walletCheck = await fetch("/api/wallet/check", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    userId: user.id,
+    walletAddress: address,
+  }),
+});
+
+const walletCheckData = await walletCheck.json();
+
+if (!walletCheck.ok) {
+  toast.error(walletCheckData.error || "Wallet not allowed.");
+  return;
+}
+
       const provider = new BrowserProvider(walletClient.transport);
       const signer = await provider.getSigner(address);
 

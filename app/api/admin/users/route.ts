@@ -1,0 +1,33 @@
+import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
+export async function GET() {
+  const { data, error } = await supabaseAdmin
+    .from("users")
+    .select(`
+      *,
+      telegram_accounts(
+        telegram_username,
+        verified
+      ),
+      wallets(
+        wallet_address,
+        is_primary
+      ),
+      cards(
+        id
+      )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    users: data ?? [],
+  });
+}
