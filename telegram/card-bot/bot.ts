@@ -3,6 +3,7 @@ import { Telegraf, Markup } from "telegraf";
 import { createClient } from "@supabase/supabase-js";
 
 const bot = new Telegraf(process.env.BOT_TOKEN!);
+const WEBSITE_URL = process.env.WEBSITE_URL || "https://reven-eight.vercel.app";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -11,12 +12,11 @@ const supabase = createClient(
 
 function mainMenu() {
   return Markup.inlineKeyboard([
-    [Markup.button.callback("🏠 Dashboard", "dashboard")],
+    [Markup.button.url("🏠 Open Dashboard", `${WEBSITE_URL}/dashboard`)],
     [
       Markup.button.callback("💰 Balance", "balance"),
       Markup.button.callback("💳 Cards", "cards"),
     ],
-    [Markup.button.callback("📜 Transactions", "transactions")],
     [
       Markup.button.callback("🔒 Freeze", "freeze"),
       Markup.button.callback("🔓 Unfreeze", "unfreeze"),
@@ -174,6 +174,33 @@ ${balance?.updated_at ? new Date(balance.updated_at).toLocaleString() : "Not ava
   );
 });
 
+function formatTelegramCard(card: any, locked: boolean, full = false) {
+  const number = card.card_number || "0000000000000000";
+  const shownNumber = full
+    ? number.replace(/(.{4})/g, "$1 ").trim()
+    : `**** **** **** ${number.slice(-4)}`;
+
+  const cvv = full ? card.cvv || "***" : "***";
+  const expiry = full ? card.expiry_date || "**/**" : "**/**";
+
+  return `
+<pre>
+╭────────────────────────────╮
+│ REVEN                 VISA │
+│                            │
+│ ${String(card.card_type || "Card").toUpperCase().padEnd(18)}     │
+│                            │
+│ ${shownNumber.padEnd(26)}│
+│                            │
+│ HOLDER        EXP     CVV  │
+│ ${(card.card_holder_name || "CARD HOLDER").slice(0, 10).padEnd(13)}${expiry.padEnd(8)}${cvv.padEnd(5)}│
+│                            │
+│ STATUS: ${String(card.status || "active").toUpperCase().padEnd(17)}│
+│ LOCKED: ${locked ? "YES" : "NO"}${" ".repeat(16)}│
+╰────────────────────────────╯
+</pre>`;
+}
+
 bot.action("cards", async (ctx) => {
   await ctx.answerCbQuery();
 
@@ -190,16 +217,14 @@ bot.action("cards", async (ctx) => {
     return;
   }
 
-  const { data: card } = await supabase
+  const { data: cards } = await supabase
     .from("cards")
     .select("*")
     .eq("user_id", account.user_id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .order("created_at", { ascending: false });
 
-  if (!card) {
-    await ctx.reply(`💳 My Card
+  if (!cards || cards.length === 0) {
+    await ctx.reply(`💳 My Cards
 
 You don't have any card yet.
 
@@ -207,39 +232,24 @@ Visit the Reven website and mint your first card.`);
     return;
   }
 
-  const { data: balance } = await supabase
-    .from("card_balances")
-    .select("locked")
-    .eq("card_id", card.id)
-    .maybeSingle();
+  for (const card of cards) {
+    const { data: balance } = await supabase
+      .from("card_balances")
+      .select("locked")
+      .eq("card_id", card.id)
+      .maybeSingle();
 
-  const cardNumber = card.card_number || "0000000000000000";
-  const maskedCardNumber = `**** **** **** ${cardNumber.slice(-4)}`;
-
-  await ctx.reply(
-`💳 Reven Card
-
-👤 Card Holder
-${card.card_holder_name || "Card Holder"}
-
-💳 Card Number
-${maskedCardNumber}
-
-🔐 CVV
-***
-
-📅 Expiry
-**/**
-
-📍 Status
-${card.status}
-
-🔒 Locked
-${balance?.locked ? "Yes" : "No"}`,
-    Markup.inlineKeyboard([
-      [Markup.button.callback("👁 Show Full Details", `show_full_card:${card.id}`)]
-    ])
-  );
+    await ctx.reply(
+      formatTelegramCard(card, Boolean(balance?.locked), false),
+      {
+        parse_mode: "HTML",
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback("👁 Show Full Card", `show_full_card:${card.id}`)],
+          [Markup.button.url("🏠 Open Dashboard", `${WEBSITE_URL}/dashboard`)],
+        ]),
+      }
+    );
+  }
 });
 
 bot.action(/^show_full_card:(.+)$/, async (ctx) => {
@@ -278,26 +288,19 @@ bot.action(/^show_full_card:(.+)$/, async (ctx) => {
     .maybeSingle();
 
   await ctx.reply(
-`👁 Full Card Details
-
-👤 Card Holder
-${card.card_holder_name || "Card Holder"}
-
-💳 Card Number
-${card.card_number || "Not available"}
-
-🔐 CVV
-${card.cvv || "Not available"}
-
-📅 Expiry
-${card.expiry_date || "Not available"}
-
-📍 Status
-${card.status}
-
-🔒 Locked
-${balance?.locked ? "Yes" : "No"}`
-  );
+  formatTelegramCard(card, Boolean(balance?.locked), true),
+  {
+    parse_mode: "HTML",
+    ...Markup.inlineKeyboard([
+      [
+        Markup.button.url(
+          "🏠 Open Dashboard",
+          `${WEBSITE_URL}/dashboard`
+        ),
+      ],
+    ]),
+  }
+);
 });
 
 bot.action("transactions", async (ctx) => {

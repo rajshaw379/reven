@@ -19,7 +19,17 @@ export default function SignupPage() {
 </p>
 
 <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-5 text-sm text-zinc-300">
-  <p>1. Open Reven Verify Bot</p>
+  <p>
+  1. Open{" "}
+  <a
+    href="https://t.me/RevenVerifybot"
+    target="_blank"
+    rel="noreferrer"
+    className="font-semibold text-emerald-300 underline"
+  >
+    Reven Verify Bot
+  </a>
+</p>
   <p>2. Send /start</p>
   <p>3. Copy the OTP</p>
   <p>4. Enter it below</p>

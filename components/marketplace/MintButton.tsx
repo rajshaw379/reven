@@ -7,6 +7,7 @@ import {
   REVEN_CARD_ABI,
   REVEN_CARD_ADDRESS,
 } from "@/lib/contract/revenCard";
+import { toast } from "sonner";
 
 interface Props {
   cardType: string;
@@ -38,9 +39,40 @@ export default function MintButton({ cardType, cardName }: Props) {
   const [shippingState, setShippingState] = useState("");
   const [shippingCountry, setShippingCountry] = useState("");
   const [shippingPostalCode, setShippingPostalCode] = useState("");
+  const [finalPriceEth, setFinalPriceEth] = useState(priceMap[cardType]);
+const [couponApplied, setCouponApplied] = useState(false);
 
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
+
+  async function applyCoupon() {
+  if (!coupon.trim()) {
+    alert("Enter coupon code.");
+    return;
+  }
+
+  if (!walletClient) {
+    alert("Connect wallet first.");
+    return;
+  }
+
+  try {
+    const provider = new BrowserProvider(walletClient.transport);
+    const contract = new Contract(REVEN_CARD_ADDRESS, REVEN_CARD_ABI, provider);
+
+    const price = await contract.getDiscountedPrice(
+      cardTypeMap[cardType],
+      coupon
+    );
+
+    setFinalPriceEth(String(Number(price) / 1e18));
+    setCouponApplied(true);
+
+    toast.success("Coupon applied successfully.");
+  } catch (err: any) {
+    alert(err?.reason || err?.message || "Coupon failed.");
+  }
+}
 
   async function mintCard() {
     const stored = localStorage.getItem("reven_user");
@@ -70,7 +102,7 @@ export default function MintButton({ cardType, cardName }: Props) {
     }
 
     if (!isConnected || !address || !walletClient) {
-      alert("Please connect your wallet before minting.");
+      toast.error("Please connect your wallet before minting.");
       return;
     }
 
@@ -88,7 +120,12 @@ export default function MintButton({ cardType, cardName }: Props) {
         signer
       );
 
-      const tx = await contract.mint(cardTypeMap[cardType], {
+      const tx =
+  couponApplied && coupon.trim() && cardType !== "free"
+    ? await contract.mintWithCoupon(cardTypeMap[cardType], coupon, {
+        value: parseEther(finalPriceEth),
+      })
+    : await contract.mint(cardTypeMap[cardType], {
         value: parseEther(priceMap[cardType]),
       });
 
@@ -126,7 +163,7 @@ export default function MintButton({ cardType, cardName }: Props) {
           shippingCountry: cardType === "physical" ? shippingCountry : null,
           shippingPostalCode:
             cardType === "physical" ? shippingPostalCode : null,
-          finalPriceEth: priceMap[cardType],
+          finalPriceEth,
         }),
       });
 
@@ -137,7 +174,12 @@ export default function MintButton({ cardType, cardName }: Props) {
         return;
       }
 
-      alert(`${cardName} minted successfully!`);
+      toast.success(`${cardName} minted successfully! Start Reven Card Bot for alerts.`, {
+  action: {
+    label: "Open Bot",
+    onClick: () => window.open("https://t.me/RevenCardBot", "_blank"),
+  },
+});
       window.location.href = "/cards";
     } catch (error: any) {
       alert(
@@ -179,13 +221,23 @@ export default function MintButton({ cardType, cardName }: Props) {
               />
 
               {(cardType === "virtual" || cardType === "physical") && (
-                <input
-                  value={coupon}
-                  onChange={(e) => setCoupon(e.target.value.toUpperCase())}
-                  placeholder="Coupon code (optional)"
-                  className="w-full rounded-2xl border border-white/10 bg-black px-5 py-4 outline-none focus:border-emerald-400"
-                />
-              )}
+  <>
+    <input
+      value={coupon}
+      onChange={(e) => setCoupon(e.target.value.toUpperCase())}
+      placeholder="Coupon code (optional)"
+      className="w-full rounded-2xl border border-white/10 bg-black px-5 py-4 outline-none focus:border-emerald-400"
+    />
+
+    <button
+      type="button"
+      onClick={applyCoupon}
+      className="w-full rounded-full border border-emerald-400/30 px-5 py-3 font-semibold text-emerald-300 hover:bg-emerald-400/10"
+    >
+      Apply Coupon
+    </button>
+  </>
+)}
 
               {cardType === "physical" && (
                 <>
@@ -241,7 +293,7 @@ export default function MintButton({ cardType, cardName }: Props) {
             <div className="mt-6 rounded-2xl border border-white/10 bg-black p-4">
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-400">Price</span>
-                <span>{priceMap[cardType]} ETH</span>
+                <span>{finalPriceEth} ETH</span>
               </div>
             </div>
 
