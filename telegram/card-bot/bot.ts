@@ -235,9 +235,26 @@ Visit the Reven website and mint your first card.`);
   for (const card of cards) {
     const { data: balance } = await supabase
       .from("card_balances")
-      .select("locked")
+      .select("balance_eth, locked")
       .eq("card_id", card.id)
       .maybeSingle();
+
+      const lockedFreeCard =
+  card.card_type === "free" && Number(balance?.balance_eth ?? 0) <= 0;
+
+if (lockedFreeCard) {
+  await ctx.reply(
+`💳 Reven Free Card
+
+🔒 Card details are locked.
+
+First reload the card from your Reven dashboard to unlock card number, CVV, and expiry.`,
+    Markup.inlineKeyboard([
+      [Markup.button.url("🏠 Open Dashboard", `${WEBSITE_URL}/dashboard`)],
+    ])
+  );
+  continue;
+}
 
     await ctx.reply(
       formatTelegramCard(card, Boolean(balance?.locked), false),
@@ -283,11 +300,27 @@ bot.action(/^show_full_card:(.+)$/, async (ctx) => {
 
   const { data: balance } = await supabase
     .from("card_balances")
-    .select("locked")
+    .select("balance_eth, locked")
     .eq("card_id", card.id)
     .maybeSingle();
 
+  const lockedFreeCard =
+  card.card_type === "free" &&
+  Number(balance?.balance_eth ?? 0) <= 0;
+
+if (lockedFreeCard) {
   await ctx.reply(
+    `🔒 Card details locked
+
+First reload this free card from your Reven dashboard to unlock full details.`,
+    Markup.inlineKeyboard([
+      [Markup.button.url("🏠 Open Dashboard", `${WEBSITE_URL}/dashboard`)],
+    ])
+  );
+  return;
+}
+
+await ctx.reply(
   formatTelegramCard(card, Boolean(balance?.locked), true),
   {
     parse_mode: "HTML",
@@ -300,7 +333,7 @@ bot.action(/^show_full_card:(.+)$/, async (ctx) => {
       ],
     ]),
   }
-);
+);    
 });
 
 bot.action("transactions", async (ctx) => {

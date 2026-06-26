@@ -38,7 +38,19 @@ export default function CardDetailsClient({ tokenId }: { tokenId: string }) {
         return;
       }
 
-      setCard(cardData);
+      const { data: balanceData } = await supabase
+  .from("card_balances")
+  .select("balance_eth, locked")
+  .eq("card_id", cardData.id)
+  .maybeSingle();
+
+const lockedFreeCard =
+  cardData.card_type === "free" && Number(balanceData?.balance_eth ?? 0) <= 0;
+
+setCard({
+  ...cardData,
+  lockedFreeCard,
+});
 
       const { data: txs } = await supabase
         .from("transactions")
@@ -97,7 +109,14 @@ export default function CardDetailsClient({ tokenId }: { tokenId: string }) {
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[420px_1fr]">
           <div>
-            <RevenCard card={card} />
+            <RevenCard
+  card={{
+    ...card,
+    card_number: card.lockedFreeCard ? "" : card.card_number,
+    cvv: card.lockedFreeCard ? "" : card.cvv,
+    expiry_date: card.lockedFreeCard ? "--/--" : card.expiry_date,
+  }}
+/>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
               <ReloadButton tokenId={Number(card.token_id)} />
@@ -128,17 +147,23 @@ export default function CardDetailsClient({ tokenId }: { tokenId: string }) {
 
                 <div>
                   <p className="text-sm text-zinc-500">Card Number</p>
-                  <p className="mt-2 break-all">{card.card_number}</p>
+                  <p className="mt-2 break-all">
+  {card.lockedFreeCard ? "Reload first to unlock" : card.card_number}
+</p>
                 </div>
 
                 <div>
                   <p className="text-sm text-zinc-500">CVV</p>
-                  <p className="mt-2">{card.cvv}</p>
+                  <p className="mt-2">
+  {card.lockedFreeCard ? "Reload first" : card.cvv}
+</p>
                 </div>
 
                 <div>
                   <p className="text-sm text-zinc-500">Expiry</p>
-                  <p className="mt-2">{card.expiry_date}</p>
+                  <p className="mt-2">
+  {card.lockedFreeCard ? "--/--" : card.expiry_date}
+</p>
                 </div>
 
                 <div>
