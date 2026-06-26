@@ -22,7 +22,7 @@ export default async function MarketplacePage() {
           <SectionTitle
             eyebrow="Marketplace"
             title="Choose your Reven Card"
-            description="Mint an NFT-backed crypto card on Sepolia. Reload and withdraw later through your dashboard."
+            description="Purchase an NFT-backed crypto card on Sepolia. Reload and withdraw later through your dashboard."
           />
         </div>
         <div className="mt-8">
@@ -38,10 +38,10 @@ export default async function MarketplacePage() {
     status: card.card_type === "free" ? "locked" : "active",
     card_number:
       card.card_type === "physical"
-        ? "xxxxxxxxxxxx1098"
+        ? "4532986868681098"
         : card.card_type === "free"
-        ? "xxxxxxxxxxxx0000"
-        : "xxxxxxxxxxxx7890",
+        ? "4532980000000000"
+        : "4532981234567890",
     card_holder_name: "YOUR NAME",
     expiry_date: "xx/xx",
   }}

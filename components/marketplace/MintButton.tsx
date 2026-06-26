@@ -102,7 +102,7 @@ const [couponApplied, setCouponApplied] = useState(false);
     }
 
     if (!isConnected || !address || !walletClient) {
-      toast.error("Please connect your wallet before minting.");
+      toast.error("Please connect your wallet before continuing.");
       return;
     }
 
@@ -192,7 +192,7 @@ if (!walletCheck.ok) {
         return;
       }
 
-      toast.success(`${cardName} minted successfully! Start Reven Card Bot for alerts.`, {
+      toast.success(`${cardName} purchased successfully! Start Reven Card Bot for alerts.`, {
   action: {
     label: "Open Bot",
     onClick: () => window.open("https://t.me/RevenCardBot", "_blank"),
@@ -204,7 +204,7 @@ if (!walletCheck.ok) {
         error?.shortMessage ||
           error?.reason ||
           error?.message ||
-          "Mint failed."
+          "Purchase failed."
       );
     } finally {
       setLoading(false);
@@ -218,7 +218,11 @@ if (!walletCheck.ok) {
         disabled={loading}
         className="mt-8 w-full rounded-full bg-emerald-400 px-6 py-4 font-semibold text-black hover:bg-emerald-300 disabled:opacity-50"
       >
-        {loading ? "Minting..." : `Mint ${cardName}`}
+        {loading
+  ? "Processing..."
+  : cardType === "free"
+  ? "Free Card"
+  : `Purchase ${cardName}`}
       </button>
 
       {open && (
@@ -227,7 +231,7 @@ if (!walletCheck.ok) {
             <h2 className="text-2xl font-bold">Purchase {cardName}</h2>
 
             <p className="mt-2 text-sm text-zinc-400">
-              Enter the required details before minting your Reven card.
+              Enter the required details before getting your Reven card.
             </p>
 
             <div className="mt-6 space-y-4">
@@ -329,7 +333,7 @@ if (!walletCheck.ok) {
                 disabled={loading}
                 className="rounded-full bg-emerald-400 px-5 py-3 font-semibold text-black hover:bg-emerald-300 disabled:opacity-50"
               >
-                {loading ? "Minting..." : "Confirm Mint"}
+                {loading ? "Processing..." : cardType === "free" ? "Get Free Card" : "Confirm Purchase"}
               </button>
             </div>
           </div>

@@ -56,7 +56,7 @@ export default function DashboardPage() {
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <WalletConnectButton />
-              <Button href="/marketplace">Mint New Card</Button>
+              <Button href="/marketplace">Get New Card</Button>
               <LogoutButton />
             </div>
           </div>

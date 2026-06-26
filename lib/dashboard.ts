@@ -14,7 +14,7 @@ export async function getDashboardData() {
 
     return {
       user: {
-        username: "Raj",
+        username: "Rog",
       },
       cards: cardsRes.data ?? [],
       transactions: transactionsRes.data ?? [],
@@ -24,7 +24,7 @@ export async function getDashboardData() {
 
     return {
       user: {
-        username: "Raj",
+        username: "Rog",
       },
       cards: [],
       transactions: [],
