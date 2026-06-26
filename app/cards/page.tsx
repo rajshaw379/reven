@@ -14,7 +14,7 @@ export default function CardsPage() {
         </h1>
 
         <p className="mt-4 text-zinc-400">
-          View all NFT cards you own.
+          View all cards you own.
         </p>
 
         <MyCardsClient />
