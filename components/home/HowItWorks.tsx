@@ -1,4 +1,4 @@
-const steps = ["Sign Up", "Verify Telegram", "Mint NFT Card", "Manage Balance"];
+const steps = ["Sign Up", "Verify Telegram", "Purchase Card", "Spend In Crypto"];
 
 export default function HowItWorks() {
   return (

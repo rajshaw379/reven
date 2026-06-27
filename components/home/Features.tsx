@@ -1,8 +1,8 @@
 const features = [
   ["Telegram Verification", "Secure signup and password reset using Reven Verify Bot."],
-  ["Wallet Connection", "Connect your wallet with RainbowKit only when needed."],
-  ["NFT Ownership", "Every card is backed by a Reven Card ERC-721 NFT."],
-  ["On-chain Vault", "Reload and withdraw through the dashboard using Sepolia ETH."],
+  ["Wallet Connection", "Connect your wallet with Rainbow Wallet only when needed."],
+  ["NFT Ownership", "Every card is backed by a Reven Card NFT."],
+  ["On-chain Vault", "Reload and withdraw through the dashboard using ETH."],
 ];
 
 export default function Features() {

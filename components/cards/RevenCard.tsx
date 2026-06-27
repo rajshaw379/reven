@@ -36,9 +36,9 @@ export default function RevenCard({ card }: { card: any }) {
             REVEN
           </span>
 
-          <span className="text-xl font-light tracking-[-0.18em] text-white/80 sm:text-2xl">
-            )))
-          </span>
+          <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/30 text-sm font-bold text-white/80">
+  R
+</span>
         </div>
 
         <div>

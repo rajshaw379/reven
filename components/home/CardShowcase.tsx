@@ -1,7 +1,7 @@
 const cards = [
-  ["Virtual Card", "0.0005 ETH", "1000 supply", "Active instantly after mint."],
-  ["Physical Card", "0.001 ETH", "700 supply", "Premium card variant."],
-  ["Free Card", "Free Mint", "300 supply", "Locked until first reload."],
+  ["Virtual Card", "$10", "1000 supply", "Active instantly after mint."],
+  ["Physical Card", "$60", "700 supply", "Premium card variant."],
+  ["Free Card", "Free", "300 supply", "Locked until first reload."],
 ];
 
 export default function CardShowcase() {

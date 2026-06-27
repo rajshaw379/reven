@@ -1,8 +1,8 @@
 const roadmap = [
   ["Phase 1", "Website", "Active"],
-  ["Phase 2", "NFT Contracts", "Next"],
-  ["Phase 3", "Telegram Bots", "Next"],
-  ["Phase 4", "Mainnet Ready", "Locked"],
+  ["Phase 2", "NFT Contracts", "Active"],
+  ["Phase 3", "Telegram Bots", "Active"],
+  ["Phase 4", "Launch", "Already"],
 ];
 
 export default function Roadmap() {

@@ -3,7 +3,7 @@ export default function Hero() {
     <section className="mx-auto flex max-w-7xl flex-col gap-10 px-5 pb-12 pt-10 sm:px-6 sm:pb-16 sm:pt-14 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12 lg:pb-20 lg:pt-24">
       <div className="min-w-0">
         <p className="mb-4 inline-flex max-w-full rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs text-emerald-300 sm:px-4 sm:py-2 sm:text-sm">
-          Sepolia Testnet Crypto Card Ecosystem
+          Reven Crypto Card Ecosystem
         </p>
 
         <h1 className="max-w-xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-7xl">
@@ -26,7 +26,7 @@ export default function Hero() {
         <div className="relative rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-900 via-emerald-950 to-black p-6 shadow-2xl sm:p-8 lg:rotate-2">
           <div className="flex justify-between text-xs text-zinc-400 sm:text-sm">
             <span>REVEN</span>
-            <span>SEPOLIA</span>
+            <span>CRYPTO</span>
           </div>
 
           <div className="mt-14 text-2xl font-bold sm:mt-20 sm:text-3xl">
@@ -34,7 +34,7 @@ export default function Hero() {
           </div>
 
           <div className="mt-3 text-sm text-emerald-300 sm:text-base">
-            NFT • Vault • Telegram
+            Card • Vault • Telegram
           </div>
 
           <div className="mt-12 text-sm tracking-[0.3em] sm:mt-16 sm:text-xl sm:tracking-[0.35em]">

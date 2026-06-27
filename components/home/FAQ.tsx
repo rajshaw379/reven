@@ -1,8 +1,8 @@
 const faqs = [
-  ["What is Reven?", "Reven is a testnet NFT crypto card ecosystem built on Sepolia."],
-  ["How does the Free Card work?", "It is free to mint but stays locked until the first reload of 0.0005 ETH."],
+  ["What is Reven?", "Reven is a crypto card ecosystem built on ETH."],
+  ["How does the Free Card work?", "It is free to mint but stays locked until the first reload of $5."],
   ["Can I reload and withdraw from Telegram?", "No. Reload and withdraw happen only through the website dashboard."],
-  ["Are these real payment cards?", "No. Reven cards are demo testnet cards for a Web3 project."],
+  ["How can I get discount on purchasing cards?", "Apply the coupon code at the time of purchasing to get discount."],
 ];
 
 export default function FAQ() {
