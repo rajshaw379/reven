@@ -14,25 +14,32 @@ function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-bot.start(async (ctx) => {
+async function createOtp({
+  telegramId,
+  telegramUsername,
+  flowType,
+  userId = null,
+}: {
+  telegramId: string;
+  telegramUsername: string | null;
+  flowType: "signup" | "password_reset";
+  userId?: string | null;
+}) {
   const otp = generateOtp();
   const otpHash = await bcrypt.hash(otp, 10);
-
-  const telegramId = String(ctx.from.id);
-  const telegramUsername = ctx.from.username || null;
-
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+
   await supabase
-  .from("verification_sessions")
-  .update({
-    status: "expired",
-  })
-  .eq("telegram_id", telegramId)
-  .eq("status", "pending");
+    .from("verification_sessions")
+    .update({ status: "expired" })
+    .eq("telegram_id", telegramId)
+    .eq("flow_type", flowType)
+    .eq("status", "pending");
 
   const { error } = await supabase.from("verification_sessions").insert({
-  session_type: "signup",
-  flow_type: "signup",
+    session_type: flowType,
+    flow_type: flowType,
+    user_id: userId,
     telegram_id: telegramId,
     telegram_username: telegramUsername,
     otp_hash: otpHash,
@@ -41,19 +48,83 @@ bot.start(async (ctx) => {
   });
 
   if (error) {
-  console.error("Supabase error:", error);
-  await ctx.reply("Something went wrong. Please try again.");
-  return;
+    console.error("Supabase error:", error);
+    throw error;
+  }
+
+  return otp;
 }
 
-  const username = telegramUsername
-  ? telegramUsername
-  : `tg_${telegramId}`;
+bot.start(async (ctx) => {
+  const telegramId = String(ctx.from.id);
+  const telegramUsername = ctx.from.username || null;
 
-await ctx.reply(
+  const payload = ctx.payload;
+
+  if (payload?.startsWith("reset_")) {
+    const username = payload.replace("reset_", "");
+
+    const { data: account } = await supabase
+      .from("telegram_accounts")
+      .select("user_id, telegram_id")
+      .eq("telegram_id", telegramId)
+      .eq("verified", true)
+      .maybeSingle();
+
+    if (!account) {
+      await ctx.reply("❌ This Telegram account is not linked to any Reven account.");
+      return;
+    }
+
+    const { data: user } = await supabase
+      .from("users")
+      .select("id, username")
+      .eq("id", account.user_id)
+      .eq("username", username)
+      .maybeSingle();
+
+    if (!user) {
+      await ctx.reply("❌ Username does not match your linked Reven account.");
+      return;
+    }
+
+    const otp = await createOtp({
+      telegramId,
+      telegramUsername,
+      flowType: "password_reset",
+      userId: user.id,
+    });
+
+    await ctx.reply(
+`🔐 Reven Password Reset
+
+Your reset code:
+
+${otp}
+
+Go back to the website and enter:
+• Username
+• Reset Code
+• New Password
+
+This code expires in 10 minutes.`
+    );
+
+    return;
+  }
+
+  const otp = await createOtp({
+    telegramId,
+    telegramUsername,
+    flowType: "signup",
+  });
+
+  const username = telegramUsername ? telegramUsername : `tg_${telegramId}`;
+
+  await ctx.reply(
 `✅ Welcome to Reven
 
-Your OTP:
+Your signup OTP:
 
 ${otp}
 
@@ -71,10 +142,74 @@ Enter:
 No username is required.
 
 This OTP expires in 10 minutes.`
-);
+  );
+});
+
+bot.command("reset", async (ctx) => {
+  const telegramId = String(ctx.from.id);
+  const telegramUsername = ctx.from.username || null;
+
+  const parts = ctx.message.text.trim().split(/\s+/);
+  const username = parts[1];
+
+  if (!username) {
+    await ctx.reply(
+`Please send your username like this:
+
+/reset your_username`
+    );
+    return;
+  }
+
+  const { data: account } = await supabase
+    .from("telegram_accounts")
+    .select("user_id, telegram_id")
+    .eq("telegram_id", telegramId)
+    .eq("verified", true)
+    .maybeSingle();
+
+  if (!account) {
+    await ctx.reply("❌ This Telegram account is not linked to any Reven account.");
+    return;
+  }
+
+  const { data: user } = await supabase
+    .from("users")
+    .select("id, username")
+    .eq("id", account.user_id)
+    .eq("username", username)
+    .maybeSingle();
+
+  if (!user) {
+    await ctx.reply("❌ Username does not match your linked Reven account.");
+    return;
+  }
+
+  const otp = await createOtp({
+    telegramId,
+    telegramUsername,
+    flowType: "password_reset",
+    userId: user.id,
+  });
+
+  await ctx.reply(
+`🔐 Reven Password Reset
+
+Your reset code:
+
+${otp}
+
+Go back to the website and enter:
+• Username
+• Reset Code
+• New Password
+
+This code expires in 10 minutes.`
+  );
 });
 
 bot.launch();
+
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
 
