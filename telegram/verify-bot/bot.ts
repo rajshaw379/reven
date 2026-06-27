@@ -58,8 +58,10 @@ async function createOtp({
 bot.start(async (ctx) => {
   const telegramId = String(ctx.from.id);
   const telegramUsername = ctx.from.username || null;
+  const text = ctx.message?.text || "";
+const payload = text.split(" ")[1] || "";
 
-  const payload = ctx.payload;
+  // payload comes from /start reset_username
 
   if (payload?.startsWith("reset_")) {
     const username = payload.replace("reset_", "");
