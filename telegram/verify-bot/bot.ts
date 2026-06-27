@@ -58,44 +58,25 @@ async function createOtp({
 bot.start(async (ctx) => {
   const telegramId = String(ctx.from.id);
   const telegramUsername = ctx.from.username || null;
-  const text = ctx.message?.text || "";
-const payload = text.split(" ")[1] || "";
 
-  // payload comes from /start reset_username
+  const { data: resetSession } = await supabase
+    .from("verification_sessions")
+    .select("id, user_id, expires_at")
+    .eq("telegram_id", telegramId)
+    .eq("flow_type", "password_reset")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  if (payload?.startsWith("reset_")) {
-    const username = payload.replace("reset_", "");
+  if (resetSession && new Date(resetSession.expires_at) > new Date()) {
+    const otp = generateOtp();
+    const otpHash = await bcrypt.hash(otp, 10);
 
-    const { data: account } = await supabase
-      .from("telegram_accounts")
-      .select("user_id, telegram_id")
-      .eq("telegram_id", telegramId)
-      .eq("verified", true)
-      .maybeSingle();
-
-    if (!account) {
-      await ctx.reply("❌ This Telegram account is not linked to any Reven account.");
-      return;
-    }
-
-    const { data: user } = await supabase
-      .from("users")
-      .select("id, username")
-      .eq("id", account.user_id)
-      .eq("username", username)
-      .maybeSingle();
-
-    if (!user) {
-      await ctx.reply("❌ Username does not match your linked Reven account.");
-      return;
-    }
-
-    const otp = await createOtp({
-      telegramId,
-      telegramUsername,
-      flowType: "password_reset",
-      userId: user.id,
-    });
+    await supabase
+      .from("verification_sessions")
+      .update({ otp_hash: otpHash })
+      .eq("id", resetSession.id);
 
     await ctx.reply(
 `🔐 Reven Password Reset
@@ -151,48 +132,30 @@ bot.command("reset", async (ctx) => {
   const telegramId = String(ctx.from.id);
   const telegramUsername = ctx.from.username || null;
 
-  const parts = ctx.message.text.trim().split(/\s+/);
-  const username = parts[1];
+  const { data: resetSession } = await supabase
+    .from("verification_sessions")
+    .select("id, user_id, expires_at")
+    .eq("telegram_id", telegramId)
+    .eq("flow_type", "password_reset")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  if (!username) {
+  if (!resetSession || new Date(resetSession.expires_at) <= new Date()) {
     await ctx.reply(
-`Please send your username like this:
-
-/reset your_username`
+      "❌ No active password reset request found. Please start from the website."
     );
     return;
   }
 
-  const { data: account } = await supabase
-    .from("telegram_accounts")
-    .select("user_id, telegram_id")
-    .eq("telegram_id", telegramId)
-    .eq("verified", true)
-    .maybeSingle();
+  const otp = generateOtp();
+  const otpHash = await bcrypt.hash(otp, 10);
 
-  if (!account) {
-    await ctx.reply("❌ This Telegram account is not linked to any Reven account.");
-    return;
-  }
-
-  const { data: user } = await supabase
-    .from("users")
-    .select("id, username")
-    .eq("id", account.user_id)
-    .eq("username", username)
-    .maybeSingle();
-
-  if (!user) {
-    await ctx.reply("❌ Username does not match your linked Reven account.");
-    return;
-  }
-
-  const otp = await createOtp({
-    telegramId,
-    telegramUsername,
-    flowType: "password_reset",
-    userId: user.id,
-  });
+  await supabase
+    .from("verification_sessions")
+    .update({ otp_hash: otpHash })
+    .eq("id", resetSession.id);
 
   await ctx.reply(
 `🔐 Reven Password Reset

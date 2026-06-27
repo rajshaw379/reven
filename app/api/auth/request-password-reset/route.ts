@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function POST(req: Request) {
@@ -19,21 +18,36 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "User not found." }, { status: 404 });
   }
 
-  const otp = String(Math.floor(100000 + Math.random() * 900000));
-  const otpHash = await bcrypt.hash(otp, 10);
+  const { data: telegram } = await supabaseAdmin
+    .from("telegram_accounts")
+    .select("telegram_id, telegram_username")
+    .eq("user_id", user.id)
+    .eq("verified", true)
+    .maybeSingle();
 
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+  if (!telegram) {
+    return NextResponse.json(
+      { error: "No linked Telegram account found." },
+      { status: 400 }
+    );
+  }
+
+  await supabaseAdmin
+    .from("verification_sessions")
+    .update({ status: "expired" })
+    .eq("user_id", user.id)
+    .eq("flow_type", "password_reset")
+    .eq("status", "pending");
 
   await supabaseAdmin.from("verification_sessions").insert({
-    user_id: user.id,
+    session_type: "password_reset",
     flow_type: "password_reset",
+    user_id: user.id,
+    telegram_id: telegram.telegram_id,
+    telegram_username: telegram.telegram_username,
     status: "pending",
-    otp_hash: otpHash,
-    expires_at: expiresAt,
+    expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
   });
 
-  return NextResponse.json({
-    success: true,
-    message: "Reset code requested. Open Reven Verify Bot.",
-  });
+  return NextResponse.json({ success: true });
 }
